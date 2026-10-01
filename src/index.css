@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink-950: #07070d;
+  --color-ink-900: #0d0d17;
+  --color-ink-800: #14141f;
+  --color-ink-700: #1d1d2c;
+  --color-ink-600: #2a2a3d;
+
+  --animate-float: float 14s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.5s ease-out both;
+
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(0, -30px, 0) scale(1.06); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  html { color-scheme: dark; scroll-behavior: smooth; }
+  body {
+    @apply bg-ink-950 font-sans text-zinc-200 antialiased;
+    min-height: 100dvh;
+  }
+  ::selection { background: rgb(139 92 246 / 0.35); }
+}
+
+@layer components {
+  .glass {
+    @apply rounded-3xl border border-white/[0.07] bg-white/[0.03] shadow-2xl shadow-black/40 backdrop-blur-xl;
+  }
+  .text-gradient {
+    @apply bg-gradient-to-r from-violet-400 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent;
+  }
+  .field {
+    @apply w-full rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-[15px] text-zinc-100
+      placeholder:text-zinc-500 outline-none transition
+      focus:border-violet-400/60 focus:ring-4 focus:ring-violet-500/15;
+  }
+}
+
+/* Background grid */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
+}
+
+select.field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 3rem;
+}
