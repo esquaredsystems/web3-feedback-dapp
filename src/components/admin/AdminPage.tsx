@@ -7,6 +7,7 @@ import { cx } from '../ui'
 import { Overview } from './Overview'
 import { Responses } from './Responses'
 import { Courses } from './Courses'
+import { ALL_TIME, DateRangeFilter, rangeBounds, type DateRange } from './DateRangeFilter'
 import { SAMPLE_COURSES, SAMPLE_FEEDBACK } from './sampleData'
 import { shortAddr, type Course, type Feedback } from './types'
 
@@ -18,6 +19,7 @@ export function AdminPage({ isOwner, owner, preview }: { isOwner: boolean; owner
   const { address } = useAccount()
   const [tab, setTab] = useState<Tab>('overview')
   const [courseFilter, setCourseFilter] = useState<number | 'all'>('all')
+  const [range, setRange] = useState<DateRange>(ALL_TIME)
   const enabled = !!FEEDBACK_CONTRACT && isOwner && !preview
 
   // ---- Data -------------------------------------------------------------
@@ -57,7 +59,20 @@ export function AdminPage({ isOwner, owner, preview }: { isOwner: boolean; owner
     const list: Feedback[] = preview ? SAMPLE_FEEDBACK : (feedbackQ.data ?? []).flat()
     return list.map((f, id) => ({ ...f, id }))
   }, [feedbackQ.data, preview])
-  const filtered = courseFilter === 'all' ? all : all.filter((f) => f.courseId === courseFilter)
+  const filtered = useMemo(() => {
+    const { min, max } = rangeBounds(range)
+    return all.filter(
+      (f) =>
+        (courseFilter === 'all' || f.courseId === courseFilter) &&
+        (min === null || f.timestamp >= min) &&
+        (max === null || f.timestamp <= max),
+    )
+  }, [all, courseFilter, range])
+  // Responses matching the course filter alone, so the range bar can show "x of y".
+  const inCourse = useMemo(
+    () => (courseFilter === 'all' ? all : all.filter((f) => f.courseId === courseFilter)),
+    [all, courseFilter],
+  )
   const counts = useMemo(
     () => all.reduce<Record<number, number>>((m, f) => ((m[f.courseId] = (m[f.courseId] ?? 0) + 1), m), {}),
     [all],
@@ -143,6 +158,10 @@ export function AdminPage({ isOwner, owner, preview }: { isOwner: boolean; owner
           </button>
         </div>
       </div>
+
+      {tab !== 'courses' && (
+        <DateRangeFilter value={range} onChange={setRange} shown={filtered.length} total={inCourse.length} />
+      )}
 
       <div role="tablist" className="mb-6 inline-flex rounded-2xl border border-white/[0.07] bg-white/[0.03] p-1">
         {(
